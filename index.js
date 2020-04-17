@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
-
+const mongoose = require("mongoose");
+//craigslistuser:Bubba23!
 const scrapingResults = [
     {
         title: "In-house Shopify Jr Web Developer & Customer Support (I-45 N. at West Rd.)",
@@ -10,7 +11,15 @@ const scrapingResults = [
         jobDescription: "We are looking for a Jr. Web Developer for Shopify, who is motivated to    combine the art of design with the art of programming. Responsibilities will include      translation of the UI/UX design wireframes to actual code that will produce visual        elements of the application.",
         compensation: "$15 Per hour / 32 hrs a week"
     }
-]
+];
+
+async function connectToMongoDb() {
+    await mongoose.connect(
+        "mongodb+srv://craigslistuser:Bubba23!@cluster0-jegiu.mongodb.net/test?retryWrites=true&w=majority",
+        { useNewUrlParser: true },
+    );
+    console.log("connected to mongodb");
+}
 
 async function scrapeListings(page) {
     
@@ -40,7 +49,7 @@ async function scrapeJobDescriptions(listings, page) {
         const jobDescription = $("#postingbody").text();
         const compensation = $("p.attrgroup > span:nth-child(1) > b").text();
         listings[i].jobDescription = jobDescription;
-        listings[1].compensation = compensation;
+        listings[i].compensation = compensation;
         console.log(listings[i].jobDescription);
         console.log(listings[i].compensation);
         await sleep(1000); // 1 second sleep
@@ -52,6 +61,7 @@ async function sleep(miliseconds) {
 }
 
 async function main() {
+    await connectToMongoDb();
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     const listings = await scrapeListings(page);
