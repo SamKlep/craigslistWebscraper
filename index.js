@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
 const mongoose = require("mongoose");
+const Listing = require("./model/Listing");
 //craigslistuser:Bubba23!
 const scrapingResults = [
     {
@@ -15,7 +16,7 @@ const scrapingResults = [
 
 async function connectToMongoDb() {
     await mongoose.connect(
-        "mongodb+srv://craigslistuser:Bubba23!@cluster0-jegiu.mongodb.net/test?retryWrites=true&w=majority",
+        "mongodb+srv://dev1:Bubba23!@cluster0-rssvn.mongodb.net/test?retryWrites=true&w=majority",
         { useNewUrlParser: true },
     );
     console.log("connected to mongodb");
@@ -24,7 +25,7 @@ async function connectToMongoDb() {
 async function scrapeListings(page) {
     
     await page.goto(
-        "https://houston.craigslist.org/d/web-html-info-design/search/web"
+        "https://houston.craigslist.org/search/jjj?query=web"
     );
     const html = await page.content();
     const $ = cheerio.load(html);
@@ -52,6 +53,8 @@ async function scrapeJobDescriptions(listings, page) {
         listings[i].compensation = compensation;
         console.log(listings[i].jobDescription);
         console.log(listings[i].compensation);
+        const listingModel = new Listing(listings[i]);
+        await listingModel.save();
         await sleep(1000); // 1 second sleep
     }
 }
